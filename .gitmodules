@@ -4,3 +4,6 @@
 [submodule "dependencies/quorum"]
 	path = dependencies/quorum
 	url = https://github.com/jpmorganchase/quorum.git
+[submodule "dependencies/go/src/github.com/istanbul-tools"]
+	path = dependencies/go/src/github.com/istanbul-tools
+	url = https://github.com/jpmorganchase/istanbul-tools

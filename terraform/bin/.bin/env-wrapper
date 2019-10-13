@@ -86,9 +86,17 @@ then
     cd global
 fi
 
-if [[ "$1" == "plan" || "$1" == "apply" || "$1" == "destroy" || "$1" == "console" || "$1" == "refresh" ]]
+if [[ "$1" == "plan" || "$1" == "apply" ]]
 then
-    terraform $1 -var "env=${env_name}" ${var_file_flag} -state ${state_file}
+  if [[ "$#" -ne 2 ]]
+    then
+        print_usage
+    else
+        terraform $1 -var "env=${env_name}" ${var_file_flag} -var "consensus_mode=$2" -state ${state_file}
+  fi
+elif [[ "$1" == "destroy" || "$1" == "console" || "$1" == "refresh" ]]
+then
+    terraform $1 -var "env=${env_name}" ${var_file_flag} -var "consensus_mode= " -state ${state_file}
 elif [[ "$1" == "output" || "$1" == "taint" || "$1" == "untaint" ]]
 then
     if [[ "$#" -ne 2 ]]

@@ -6,6 +6,9 @@ echo "building quorum-aws locally"
 stack setup
 stack build
 
+echo "building istanbul-tools locally"
+make -C ./dependencies/go/src/github.com/istanbul-tools
+
 echo "building quorum-aws for AWS"
 docker build -t quorum-aws .
 

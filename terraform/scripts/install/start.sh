@@ -20,4 +20,5 @@ fi
 echo "trying to start constellation and quorum..."
 
 ./.start-constellation
-./.start-quorum
+sleep 30
+./.start-quorum $1

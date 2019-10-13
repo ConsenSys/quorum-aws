@@ -169,10 +169,15 @@ resource "null_resource" "cluster_datadirs" {
     num_instances = "${var.num_instances}"
     subnet_azs = "${join(",", var.subnet_azs)}"
     local_datadir_root = "${var.local_datadir_root}"
+    consensus_mode = "${var.consensus_mode}"
   }
 
   provisioner "local-exec" {
     command = "${var.multi_region ? (var.first_geth_id == "1" ? "stack exec -- aws-bootstrap --cluster-size ${var.total_cluster_size} --subnets ${length(var.subnet_azs)} --path ${var.local_datadir_root} --multi-region" : "echo skipping datadir creation for multi-region cluster beyond the first region") : "stack exec -- aws-bootstrap --cluster-size ${var.total_cluster_size} --subnets ${length(var.subnet_azs)} --path ${var.local_datadir_root}" }"
+  }
+
+  provisioner "local-exec" {
+    command= "./scripts/init.sh ${var.local_datadir_root} ${var.num_instances} ${var.consensus_mode}"
   }
 }
 
@@ -225,6 +230,11 @@ resource "aws_instance" "quorum" {
     destination = "${var.remote_homedir}/datadir"
   }
 
+    provisioner "file" {
+    source = "${var.local_datadir_root}/genesis.json"
+    destination = "${var.remote_homedir}/datadir/genesis.json"
+  }
+
   provisioner "file" {
     source = "secrets/${var.tunnel_keypair_name}"
     destination = "${var.remote_homedir}/.ssh/${var.tunnel_keypair_name}"
@@ -270,6 +280,11 @@ resource "aws_instance" "quorum" {
     destination = "${var.remote_homedir}/start"
   }
 
+  provisioner "file" {
+    source = "scripts/provision/start-single-region-cluster.sh"
+    destination = "${var.remote_homedir}/start-single-region-cluster"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "chmod +x spam",
@@ -290,8 +305,15 @@ resource "aws_instance" "quorum" {
   provisioner "remote-exec" {
     scripts = [
       "scripts/provision/prepare.sh",
-      "scripts/provision/fetch-images.sh",
-      "scripts/provision/start-single-region-cluster.sh"
+      "scripts/provision/fetch-images.sh"
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x ${var.remote_homedir}/start-single-region-cluster",
+      "${var.remote_homedir}/start-single-region-cluster ${var.consensus_mode}" ,
+      "rm ${var.remote_homedir}/start-single-region-cluster"
     ]
   }
 }

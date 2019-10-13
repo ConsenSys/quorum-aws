@@ -2,6 +2,10 @@ variable "env" {
   description = "Name of the environment"
   # this value is set by bin/.bin/env-wrapper
 }
+variable "consensus_mode" {
+  description = "Choice of istanbul or raft"
+  # this value is set through the command line
+}
 variable "access_key" {
   description = "AWS access key"
   #
